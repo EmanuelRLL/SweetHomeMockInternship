@@ -2022,10 +2022,13 @@ public class PlanComponent extends JComponent implements PlanView, Scrollable, P
     }
     Level levelToPrint = viewableLevels.get(pageIndex);
     Level previousLevel = home.getSelectedLevel();
-    home.setSelectedLevel(levelToPrint);
-    int pageExists = printOnce(g, pageFormat, 0);
-    home.setSelectedLevel(previousLevel);
-    return pageExists;
+    try {
+      home.setSelectedLevel(levelToPrint);
+      return printOnce(g, pageFormat, 0);
+    }
+    finally {
+      home.setSelectedLevel(previousLevel);
+    }
   }
   /**
    * Helper method for the <code>print</code> method that prints the plan of the currently selected level.
