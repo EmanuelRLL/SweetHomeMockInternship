@@ -2002,12 +2002,35 @@ public class PlanComponent extends JComponent implements PlanView, Scrollable, P
     }
     return strokeWidth;
   }
-  
+
   /**
-   * Prints this component plan at the scale given in the home print attributes or at a scale 
+   * Prints this component plan page in the given <code> pageIndex </code>, at the scale given in the home print attributes or at a scale
    * that makes it fill <code>pageFormat</code> imageable size if this attribute is <code>null</code>.
    */
   public int print(Graphics g, PageFormat pageFormat, int pageIndex) {
+    List<Level> viewableLevels = new ArrayList<Level>();
+    List<Level> levelsList = home.getLevels();
+    for (int i = 0; i < levelsList.size(); i++) {
+      if (levelsList.get(i).isViewable()) {
+        viewableLevels.add(levelsList.get(i));
+      }
+    }
+    if (viewableLevels.isEmpty()) {
+      return printOnce(g, pageFormat, pageIndex);
+    } else if (pageIndex >= viewableLevels.size()) {
+      return NO_SUCH_PAGE;
+    }
+    Level levelToPrint = viewableLevels.get(pageIndex);
+    Level previousLevel = home.getSelectedLevel();
+    home.setSelectedLevel(levelToPrint);
+    int pageExists = printOnce(g, pageFormat, 0);
+    home.setSelectedLevel(previousLevel);
+    return pageExists;
+  }
+  /**
+   * Helper method for the <code>print</code> method that prints the plan of the currently selected level.
+   */
+  private int printOnce(Graphics g, PageFormat pageFormat, int pageIndex) {
     List<Selectable> printedItems = getPaintedItems(); 
     Rectangle2D printedItemBounds = getItemsBounds(g, printedItems);
     if (printedItemBounds != null) {
